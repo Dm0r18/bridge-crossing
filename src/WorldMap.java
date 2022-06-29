@@ -14,14 +14,14 @@ public class WorldMap {
 
         private static final long serialVersionUID = -6198608761521202696L;
 
-        private WorldZone worldZone;
+        private WorldArea worldZone;
 
-        public WorldZone(int x, int y, int width, int height, WorldZone worldZone) {
+        public WorldZone(int x, int y, int width, int height, WorldArea worldZone) {
             super(x, y, width, height);
             this.worldZone = worldZone;
         }
 
-        public WorldZone getWorldZoneType() {
+        public WorldArea getWorldZoneType() {
             return worldZone;
         }
 
@@ -63,7 +63,7 @@ public class WorldMap {
 
     private void calculateMapZoneSize() {
         int numberOfTiles = 0;
-        for(WorldZone type : WorldZone.values()) {
+        for(WorldArea type : WorldArea.values()) {
             numberOfTiles += type.getWidthRatio();
         }
         mapZoneWidth = (int) (this.worldSize.getWidth()/numberOfTiles);
@@ -79,14 +79,14 @@ public class WorldMap {
         int x = 0;
         int width = 0;
 
-        for(WorldZone type : WorldZone.values()) {
+        for(WorldArea type : WorldArea.values()) {
             x += width;
-            width = (int) mapZoneWidth * type.getWidthRatio() ;
+            width = mapZoneWidth * type.getWidthRatio() ;
             worldZones.add(new WorldZone(x, y, width, height, type));
         }
     }
 
-    public WorldZone getWorldZone(WorldZone type) {
+    public WorldZone getWorldZone(WorldArea type) {
         for(WorldZone worldZone : worldZones) {
             if(worldZone.getWorldZoneType() == type) {
                 return worldZone;
@@ -107,7 +107,7 @@ public class WorldMap {
         return (int) worldSize.getHeight();
     }
 
-    public Dimension getWorldZoneSize(WorldZone type) {
+    public Dimension getWorldZoneSize(WorldArea type) {
         WorldZone worldZone = getWorldZone(type);
         if(worldZone == null)
             return null;
@@ -115,7 +115,7 @@ public class WorldMap {
             return worldZone.getSize();
     }
 
-    public int getWorldZoneWidth(WorldZone type) {
+    public int getWorldZoneWidth(WorldArea type) {
         Dimension size = getWorldZoneSize(type);
         if(size == null)
             return 0;
@@ -123,7 +123,7 @@ public class WorldMap {
             return (int) size.getWidth();
     }
 
-    public int getWorldZoneHeight(WorldZone type) {
+    public int getWorldZoneHeight(WorldArea type) {
         Dimension size = getWorldZoneSize(type);
         if(size == null)
             return 0;
@@ -131,7 +131,7 @@ public class WorldMap {
             return (int) size.getHeight();
     }
 
-    public int getWorldZoneX(WorldZone type) {
+    public int getWorldZoneX(WorldArea type) {
         WorldZone worldZone = getWorldZone(type);
         if(worldZone == null)
             return -1;
@@ -139,7 +139,7 @@ public class WorldMap {
             return (int) worldZone.getX();
     }
 
-    public int getWorldZoneY(WorldZone type) {
+    public int getWorldZoneY(WorldArea type) {
         WorldZone worldZone = getWorldZone(type);
         if(worldZone == null)
             return -1;

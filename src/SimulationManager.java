@@ -12,7 +12,7 @@ public class SimulationManager implements Runnable {
     private LogPanel logPanel;
     private DrawPanel drawPanel;
 
-    private ArrayList<Bus> buses;
+    private ArrayList<Car> cars;
     private Bridge bridge;
     private WorldMap worldMap;
 
@@ -27,8 +27,8 @@ public class SimulationManager implements Runnable {
         this.busSpawnMaxDelay = busSpawnMaxDelay;
         busesWaitingTextField = busesInQueueTextField;
         busesCrossingTextField = busesOnBridgeTextField;
-        bridge = new Bridge(BridgeThroughput.ONE_BUS_ONE_WAY);
-        buses = new ArrayList<Bus>();
+        bridge = Bridge.getInstance();
+        cars = new ArrayList<Car>();
     }
 
     public float getBusSpawnMaxDelay (){
@@ -53,11 +53,11 @@ public class SimulationManager implements Runnable {
             @Override
             public void run() {
                 while(true) {
-                    Bus bus = new Bus(bridge, logPanel, worldMap);
-                    synchronized (buses) {
-                        buses.add(bus);
+                    Car car = new Car(bridge, logPanel, worldMap);
+                    synchronized (cars) {
+                        cars.add(car);
                     }
-                    new Thread(bus, "BUS" + BUS_ID++).start();
+                    new Thread(car, "BUS" + BUS_ID++).start();
 
                     try {
                         int timeToNextSpawn = ThreadLocalRandom.current().nextInt((int)busSpawnMaxDelay/2, busSpawnMaxDelay);
@@ -70,8 +70,8 @@ public class SimulationManager implements Runnable {
         }, "BUS_SPAWNER").start();
 
         while(true) {
-            synchronized (buses) {
-                buses.removeIf((x) -> x.isToRemove());
+            synchronized (cars) {
+                cars.removeIf((x) -> x.isToRemove());
             }
 
             busesWaitingTextField.setText(bridge.getWaitngBusesList());
@@ -91,9 +91,9 @@ public class SimulationManager implements Runnable {
             worldMap.draw(g);
         }
 
-        synchronized (buses) {
-            for(Bus bus : buses) {
-                bus.draw(g);
+        synchronized (cars) {
+            for(Car car : cars) {
+                car.draw(g);
             }
         }
     }

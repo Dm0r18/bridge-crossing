@@ -37,7 +37,7 @@ public class NarrowBridgeApp extends JFrame implements ActionListener, ChangeLis
 //										 + "Bridge may work in 4 different ways: \n"
 //										 + "- \"One bus, one way\" - only one bus crossing bridge at the time.\n"
 //										 + "- \"Many buses, one way\" - many buses crossing bridge at the time, but only in one direction. \n"
-//										 + "    Bus limit might be changed in any time. \n"
+//										 + "    Car limit might be changed in any time. \n"
 //										 + "    Directions changes automatically every 10 seconds.\n"
 //										 + "- \"Many buses, both ways\" - same as for  \"Many buses, one way\", but buses might drive in both directions.  \n"
 //										 + "- \"Unlimited\" - unilitmited crossing in both directions\n";
