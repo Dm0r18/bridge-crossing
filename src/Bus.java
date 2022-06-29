@@ -4,55 +4,9 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.util.concurrent.ThreadLocalRandom;
 
-enum BusDirection {
-    EAST("E", 1),
-    WEST("W", -1);
-
-    private String name;
-    private int direction;
-
-    BusDirection(String name, int direction){
-        this.name = name;
-        this.direction = direction;
-    }
-
-    @Override
-    public String toString(){
-        return name;
-    }
-
-    public int getDirection() {
-        return direction;
-    }
-}
-
-enum BusState {
-    INITIALIZATION("[Bus has spawned on start parking] "),
-    EMBARKATION("Is embarking "),
-    ON_ROAD_TO_BRIDGE("Is driving towards bridge "),
-    GET_ON_BRIDGE("Is waiting in queue "),
-    CROSS_THE_BRIDGE("Is crossing the bridge "),
-    GET_OFF_BRIDGE("Is leaving the bridge "),
-    ON_ROAD_TO_PARKING("Is driving towards end parking"),
-    DISEMBARKATION("Is diembarking "),
-    TO_REMOVE("[Bus has despawned] ");
-
-    private String stateMessage;
-
-    BusState(String stateMessage){
-        this.stateMessage = stateMessage;
-    }
-
-    @Override
-    public String toString() {
-        return stateMessage;
-    }
-
-}
-
 public class Bus implements Runnable {
 
-    private static int BUS_NUMBER = 1;
+    private static int CAR_COUNTER = 1;
 
     private static int MIN_EMBARKATION_TIME = 500;
     private static int MAX_EMBARKATION_TIME = 5000;
@@ -72,13 +26,12 @@ public class Bus implements Runnable {
     private int height;
 
     private int speed;
-    private BusDirection busDirection;
+    private Direction direction;
     private Color activeColor;
     private Color inactiveColor;
     private Color currentColor;
 
     private Bridge bridge;
-    private LogPanel logPanel;
     private WorldMap worldMap;
 
     private int busID;
@@ -87,11 +40,10 @@ public class Bus implements Runnable {
     private BusState nextState;
 
 
-    public Bus(Bridge bridge, LogPanel logPanel, WorldMap worldMap) {
+    public Bus(Bridge bridge, WorldMap worldMap) {
         this.bridge = bridge;
-        this.logPanel = logPanel;
         this.worldMap = worldMap;
-        this.busID = BUS_NUMBER++;
+        this.busID = CAR_COUNTER++;
 
         width = 40;
         height = 20;
@@ -101,12 +53,12 @@ public class Bus implements Runnable {
         nextState = BusState.EMBARKATION;
 
         if(ThreadLocalRandom.current().nextBoolean()) {
-            busDirection = BusDirection.EAST;
+            direction = Direction.EAST;
             x = 4;
             activeColor = new Color(51, 204, 51);
             inactiveColor = new Color(0, 153, 51);
         }else {
-            busDirection = BusDirection.WEST;
+            direction = Direction.WEST;
             x = worldMap.getWidth() - width - 4;
             activeColor =  new Color(0, 204, 255);
             inactiveColor =  new Color(0, 153, 204);
@@ -129,8 +81,8 @@ public class Bus implements Runnable {
         return busID;
     }
 
-    public BusDirection getBusDirection() {
-        return busDirection;
+    public Direction getBusDirection() {
+        return direction;
     }
 
     @Override
@@ -187,7 +139,7 @@ public class Bus implements Runnable {
         sb.append("<< [Bus");
         sb.append(String.format("%04d", busID));
         sb.append(" -> ");
-        sb.append(busDirection);
+        sb.append(direction);
         sb.append("] ");
         sb.append(message);
         logPanel.addLog(sb.toString());
@@ -213,12 +165,12 @@ public class Bus implements Runnable {
         }
 
         int distance = 0;
-        if(busDirection == BusDirection.WEST) {
-            distance = worldMap.getWorldZoneHeight(WorldZoneType.EAST_ROAD);
+        if(direction == Direction.WEST) {
+            distance = worldMap.getWorldZoneHeight(WorldZone.EAST_ROAD);
         }else {
-            distance = worldMap.getWorldZoneHeight(WorldZoneType.WEST_ROAD);
+            distance = worldMap.getWorldZoneHeight(WorldZone.WEST_ROAD);
         }
-        speed = 10 * busDirection.getDirection() * distance/time;
+        speed = 10 * direction.getDirection() * distance/time;
     }
 
     private void initialization() {
@@ -242,11 +194,11 @@ public class Bus implements Runnable {
             calculateSpeed(ON_ROAD_TO_BRIDGE_TIME);
             nextState = BusState.GET_ON_BRIDGE;
         }else {
-            if(busDirection == BusDirection.EAST) {
-                if(x > worldMap.getWorldZoneX(WorldZoneType.WEST_GATE))
+            if(direction == Direction.EAST) {
+                if(x > worldMap.getWorldZoneX(WorldZone.WEST_GATE))
                     currentState = nextState;
-            }else if(busDirection == BusDirection.WEST) {
-                if(x + width < worldMap.getWorldZoneX(WorldZoneType.EAST_ROAD))
+            }else if(direction == Direction.WEST) {
+                if(x + width < worldMap.getWorldZoneX(WorldZone.EAST_ROAD))
                     currentState = nextState;
             }
         }
@@ -264,11 +216,11 @@ public class Bus implements Runnable {
             calculateSpeed(ON_BRIDGE_TIME);
             nextState = BusState.GET_OFF_BRIDGE;
         }else {
-            if(busDirection == BusDirection.EAST) {
-                if (x > worldMap.getWorldZoneX(WorldZoneType.EAST_GATE))
+            if(direction == Direction.EAST) {
+                if (x > worldMap.getWorldZoneX(WorldZone.EAST_GATE))
                     currentState = nextState;
-            }else if(busDirection == BusDirection.WEST) {
-                if (x + width < worldMap.getWorldZoneX(WorldZoneType.BRIDGE))
+            }else if(direction == Direction.WEST) {
+                if (x + width < worldMap.getWorldZoneX(WorldZone.BRIDGE))
                     currentState = nextState;
             }
         }
@@ -286,11 +238,11 @@ public class Bus implements Runnable {
             calculateSpeed(ON_ROAD_TO_PARKING_TIME);
             nextState = BusState.DISEMBARKATION;
         }else {
-            if(busDirection == BusDirection.EAST) {
-                if (x > worldMap.getWorldZoneX(WorldZoneType.EAST_PARKING))
+            if(direction == Direction.EAST) {
+                if (x > worldMap.getWorldZoneX(WorldZone.EAST_PARKING))
                     currentState = nextState;
-            }else if(busDirection == BusDirection.WEST) {
-                if (x + width < worldMap.getWorldZoneX(WorldZoneType.WEST_ROAD))
+            }else if(direction == Direction.WEST) {
+                if (x + width < worldMap.getWorldZoneX(WorldZone.WEST_ROAD))
                     currentState = nextState;
             }
         }

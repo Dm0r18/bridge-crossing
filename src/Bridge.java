@@ -2,96 +2,63 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
-enum BridgeThroughput {
-    ONE_BUS_ONE_WAY("One bus, one way", 1),
-    MANY_BUSES_ONE_WAY("Many buses, one way", 3),
-    MANY_BUSES_BOTH_WAYS("Many buses, both ways", 3),
-    UNLIMITED("Unlimited", Integer.MAX_VALUE);
-
-
-    private String text;
-    private int busLimit;
-
-    private BridgeThroughput(String text, int busLimit) {
-        this.text = text;
-        this.busLimit = busLimit;
-    }
-
-    @Override
-    public String toString() {
-        return text;
-    }
-
-    public void setbusLimit(int busLimit) {
-        this.busLimit = busLimit;
-    }
-
-    public int getBusLimit() {
-        return busLimit;
-    }
-
-}
+//enum BridgeThroughput {
+//    ONE_BUS_ONE_WAY("One bus, one way", 1),
+//    MANY_BUSES_ONE_WAY("Many buses, one way", 3),
+//    MANY_BUSES_BOTH_WAYS("Many buses, both ways", 3),
+//    UNLIMITED("Unlimited", Integer.MAX_VALUE);
+//
+//
+//    private String text;
+//    private int busLimit;
+//
+//    private BridgeThroughput(String text, int busLimit) {
+//        this.text = text;
+//        this.busLimit = busLimit;
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return text;
+//    }
+//
+//    public void setbusLimit(int busLimit) {
+//        this.busLimit = busLimit;
+//    }
+//
+//    public int getBusLimit() {
+//        return busLimit;
+//    }
+//
+//}
 
 public class Bridge {
+    private static Bridge instance = null;
+    private ArrayList<Car> carWaiting;
+    private ArrayList<Car> carCrossing;
+    private HashSet<Direction> directions;
+    private int bridgeThroughput;
 
-    private class DirectionSwitcher implements Runnable {
+    private Bridge() {
+        directions = new HashSet<>();
+        carWaiting = new ArrayList<>();
+        carCrossing = new ArrayList<>();
+        bridgeThroughput = 3;
+    }
 
-        private final static int SWITCH_TIME = 10000;
-
-        private boolean useSwitcher;
-        private BusDirection previousDirection;
-
-        public DirectionSwitcher() {
-            useSwitcher = true;
-            if(ThreadLocalRandom.current().nextBoolean())
-                previousDirection = BusDirection.EAST;
-            else
-                previousDirection = BusDirection.WEST;
+    public static Bridge getInstance() {
+        if(instance == null) {
+            instance = new Bridge();
         }
-
-        @Override
-        public void run() {
-            while(useSwitcher) {
-
-                BusDirection newDirection;
-                if(previousDirection == BusDirection.WEST){
-                    newDirection = BusDirection.EAST;
-                } else {
-                    newDirection = BusDirection.WEST;
-                }
-
-                allowedDirections.clear();
-                allowedDirections.add(newDirection);
-                previousDirection = newDirection;
-
-                try {
-                    Thread.sleep(SWITCH_TIME);
-                } catch (InterruptedException e) {
-                    System.err.println("Sleep error");
-                }
-            }
-        }
-
-        public void closeSwitcher() {
-            this.useSwitcher = false;
+        else {
+            return instance;
         }
     }
 
-    private ArrayList<Bus> busesWaiting;
-    private ArrayList<Bus> busesCrossing;
-
-    private BridgeThroughput bridgeThroughput;
-
-    private HashSet<BusDirection> allowedDirections;
     private DirectionSwitcher directionSwitcher;
 
-    public Bridge(BridgeThroughput bridgeThroughput) {
-        allowedDirections = new HashSet<BusDirection>();
-
-        busesWaiting = new ArrayList<Bus>();
-        busesCrossing = new ArrayList<Bus>();
-
-        setBridgeThroughput(bridgeThroughput);
+    public int getBridgeThroughput() {
+        return bridgeThroughput;
     }
 
     public void setBridgeThroughput(BridgeThroughput bridgeThroughput) {
@@ -110,9 +77,9 @@ public class Bridge {
                     directionSwitcher.closeSwitcher();
                     directionSwitcher = null;
                 }
-                allowedDirections.clear();
-                allowedDirections.add(BusDirection.EAST);
-                allowedDirections.add(BusDirection.WEST);
+                directions.clear();
+                directions.add(Direction.EAST);
+                directions.add(Direction.WEST);
                 break;
             case MANY_BUSES_ONE_WAY:
                 if(directionSwitcher == null) {
@@ -128,10 +95,10 @@ public class Bridge {
     }
 
     public synchronized void getOnTheBridge(Bus bus) {
-        while(busesCrossing.size() >= bridgeThroughput.getBusLimit() ||
-                !allowedDirections.contains(bus.getBusDirection())) {
+        while(carCrossing.size() >= bridgeThroughput.getBusLimit() ||
+                !directions.contains(bus.getBusDirection())) {
 
-            busesWaiting.add(bus);
+            carWaiting.add(bus);
             bus.setInactiveColor();
             bus.sendLog(BusState.GET_ON_BRIDGE.toString());
 
@@ -141,15 +108,15 @@ public class Bridge {
                 System.err.println("Sleep error");
             }
 
-            busesWaiting.remove(bus);
+            carWaiting.remove(bus);
         }
 
         bus.setActiveColor();
-        busesCrossing.add(bus);
+        carCrossing.add(bus);
     }
 
     public synchronized void getOffTheBridge(Bus bus) {
-        busesCrossing.remove(bus);
+        carCrossing.remove(bus);
         bus.sendLog(BusState.GET_OFF_BRIDGE.toString());
 
         notifyBuses();
@@ -159,7 +126,7 @@ public class Bridge {
         switch(bridgeThroughput) {
             case MANY_BUSES_ONE_WAY:
             case MANY_BUSES_BOTH_WAYS:
-                for(int i=bridgeThroughput.getBusLimit()-busesCrossing.size(); i>0; i--) {
+                for(int i = bridgeThroughput.getBusLimit()- carCrossing.size(); i>0; i--) {
                     notify();
                 }
                 break;
@@ -177,7 +144,7 @@ public class Bridge {
 
     public synchronized String getWaitngBusesList() {
         StringBuilder sb = new StringBuilder();
-        for (Bus bus : busesWaiting) {
+        for (Bus bus : carWaiting) {
             sb.append(bus.toString());
             sb.append("   ");
         }
@@ -186,7 +153,7 @@ public class Bridge {
 
     public synchronized String getCrossingBusesList() {
         StringBuilder sb = new StringBuilder();
-        for (Bus bus : busesCrossing) {
+        for (Bus bus : carCrossing) {
             sb.append(bus.toString());
             sb.append("   ");
         }

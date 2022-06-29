@@ -49,7 +49,7 @@ public class NarrowBridgeApp extends JFrame implements ActionListener, ChangeLis
 		SwingUtilities.invokeLater(NarrowBridgeApp::new);
 	}
 	
-	private JMenuBar menuBar = new JMenuBar();
+//	private JMenuBar menuBar = new JMenuBar();
 	
 //	private JMenu helpMenu = new JMenu("Help");
 //	private JMenuItem authorInfoMenuItem = new JMenuItem("Author");
@@ -68,7 +68,7 @@ public class NarrowBridgeApp extends JFrame implements ActionListener, ChangeLis
 	
 	//private JComboBox<BridgeThroughput> bridgeThroughputModeComboBox = new JComboBox<>(BridgeThroughput.values());
 	
-	private JSpinner maxBusesOnBridgeSpinner = new JSpinner(new SpinnerNumberModel(BridgeThroughput.MANY_BUSES_ONE_WAY.getBusLimit(), 1, 10, 1));
+	private JSpinner maxBusesOnBridgeSpinner = new JSpinner(new SpinnerNumberModel(Bridge.getInstance().getBridgeThroughput(), 1, 10, 1));
 	
 	//private LogPanel logPanel = new LogPanel();
 	private DrawPanel drawPanel = new DrawPanel();

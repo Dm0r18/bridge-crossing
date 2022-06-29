@@ -8,63 +8,25 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
-enum WorldZoneType{
-    WEST_PARKING("WEST PARKING", Color.DARK_GRAY, 1),
-    WEST_ROAD("WEST ROAD", Color.LIGHT_GRAY, 3),
-    WEST_GATE("WEST GATE", Color.DARK_GRAY, 1),
-    BRIDGE("BRIDGE", new Color(102, 102, 153), 3),
-    EAST_GATE("EAST GATE", Color.DARK_GRAY, 1),
-    EAST_ROAD("EAST ROAD", Color.LIGHT_GRAY, 3),
-    EAST_PARKING("EAST PARKING", Color.DARK_GRAY, 1);
-
-    private String name;
-    private Color color;
-    private int widthRatio;
-
-    WorldZoneType(String name, Color color, int widthRatio) {
-        this.name = name;
-        this.color = color;
-        this.widthRatio = widthRatio;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public int getWidthRatio() {
-        return widthRatio;
-    }
-
-    @Override
-    public String toString() {
-        return name;
-    }
-
-}
-
 public class WorldMap {
 
     private class WorldZone extends Rectangle {
 
         private static final long serialVersionUID = -6198608761521202696L;
 
-        private WorldZoneType worldZoneType;
+        private WorldZone worldZone;
 
-        public WorldZone(int x, int y, int width, int height, WorldZoneType worldZoneType) {
+        public WorldZone(int x, int y, int width, int height, WorldZone worldZone) {
             super(x, y, width, height);
-            this.worldZoneType = worldZoneType;
+            this.worldZone = worldZone;
         }
 
-        public WorldZoneType getWorldZoneType() {
-            return worldZoneType;
+        public WorldZone getWorldZoneType() {
+            return worldZone;
         }
 
         public void draw(Graphics g) {
-            g.setColor(worldZoneType.getColor());
+            g.setColor(worldZone.getColor());
             g.fillRect(x, y, width, height);
 
             AffineTransform affineTransform = new AffineTransform();
@@ -79,9 +41,9 @@ public class WorldMap {
 
             FontMetrics fm = g2.getFontMetrics(font);
             int tx = x + width/2 + fm.getHeight()/4;
-            int ty = y + height/2 + fm.stringWidth(worldZoneType.getName())/4 + fm.getAscent()/8;
+            int ty = y + height/2 + fm.stringWidth(worldZone.getName())/4 + fm.getAscent()/8;
 
-            g2.drawString(worldZoneType.getName(), tx, ty);
+            g2.drawString(worldZone.getName(), tx, ty);
         }
     }
 
@@ -101,7 +63,7 @@ public class WorldMap {
 
     private void calculateMapZoneSize() {
         int numberOfTiles = 0;
-        for(WorldZoneType type : WorldZoneType.values()) {
+        for(WorldZone type : WorldZone.values()) {
             numberOfTiles += type.getWidthRatio();
         }
         mapZoneWidth = (int) (this.worldSize.getWidth()/numberOfTiles);
@@ -117,14 +79,14 @@ public class WorldMap {
         int x = 0;
         int width = 0;
 
-        for(WorldZoneType type : WorldZoneType.values()) {
+        for(WorldZone type : WorldZone.values()) {
             x += width;
             width = (int) mapZoneWidth * type.getWidthRatio() ;
             worldZones.add(new WorldZone(x, y, width, height, type));
         }
     }
 
-    public WorldZone getWorldZone(WorldZoneType type) {
+    public WorldZone getWorldZone(WorldZone type) {
         for(WorldZone worldZone : worldZones) {
             if(worldZone.getWorldZoneType() == type) {
                 return worldZone;
@@ -145,7 +107,7 @@ public class WorldMap {
         return (int) worldSize.getHeight();
     }
 
-    public Dimension getWorldZoneSize(WorldZoneType type) {
+    public Dimension getWorldZoneSize(WorldZone type) {
         WorldZone worldZone = getWorldZone(type);
         if(worldZone == null)
             return null;
@@ -153,7 +115,7 @@ public class WorldMap {
             return worldZone.getSize();
     }
 
-    public int getWorldZoneWidth(WorldZoneType type) {
+    public int getWorldZoneWidth(WorldZone type) {
         Dimension size = getWorldZoneSize(type);
         if(size == null)
             return 0;
@@ -161,7 +123,7 @@ public class WorldMap {
             return (int) size.getWidth();
     }
 
-    public int getWorldZoneHeight(WorldZoneType type) {
+    public int getWorldZoneHeight(WorldZone type) {
         Dimension size = getWorldZoneSize(type);
         if(size == null)
             return 0;
@@ -169,7 +131,7 @@ public class WorldMap {
             return (int) size.getHeight();
     }
 
-    public int getWorldZoneX(WorldZoneType type) {
+    public int getWorldZoneX(WorldZone type) {
         WorldZone worldZone = getWorldZone(type);
         if(worldZone == null)
             return -1;
@@ -177,7 +139,7 @@ public class WorldMap {
             return (int) worldZone.getX();
     }
 
-    public int getWorldZoneY(WorldZoneType type) {
+    public int getWorldZoneY(WorldZone type) {
         WorldZone worldZone = getWorldZone(type);
         if(worldZone == null)
             return -1;
