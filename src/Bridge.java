@@ -1,45 +1,13 @@
 import java.util.ArrayList;
 
-//enum BridgeThroughput {
-//    ONE_BUS_ONE_WAY("One bus, one way", 1),
-//    MANY_BUSES_ONE_WAY("Many buses, one way", 3),
-//    MANY_BUSES_BOTH_WAYS("Many buses, both ways", 3),
-//    UNLIMITED("Unlimited", Integer.MAX_VALUE);
-//
-//
-//    private String text;
-//    private int busLimit;
-//
-//    private BridgeThroughput(String text, int busLimit) {
-//        this.text = text;
-//        this.busLimit = busLimit;
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return text;
-//    }
-//
-//    public void setbusLimit(int busLimit) {
-//        this.busLimit = busLimit;
-//    }
-//
-//    public int getBusLimit() {
-//        return busLimit;
-//    }
-//
-//}
-
 public class Bridge {
     private static Bridge instance = null;
-    private ArrayList<Car> carWaiting;
-    private ArrayList<Car> carCrossing;
-    private Direction direction;
-    private DirectionSwitcher directionSwitcher;
+    private final ArrayList<Car> carCrossing;
+    private Direction direction = null;
+    private boolean switchDirection = false;
     private int bridgeThroughput;
 
     private Bridge() {
-        carWaiting = new ArrayList<>();
         carCrossing = new ArrayList<>();
         bridgeThroughput = 3;
     }
@@ -57,62 +25,44 @@ public class Bridge {
 
     public void setBridgeThroughput(int bridgeThroughput) {
         this.bridgeThroughput = bridgeThroughput;
+        notifyBuses();
 //        setAllowedDirections();
     }
 
-//    private synchronized void setAllowedDirections() {
-//        if(directionSwitcher == null) {
-//            directionSwitcher = new DirectionSwitcher();
-//            new Thread(directionSwitcher, "DIRECTON_SWITCHER").start();
-//
-//        }
-//
-//        notifyBuses();
-//    }
+    private boolean isSafe(Car c) {
+        if(direction == null) {
+            return true;
+        } else if(switchDirection) {
+            return c.getCarDirection() != direction;
+        } else return c.getCarDirection() == direction;
+    }
 
     public synchronized void getOnTheBridge(Car car) {
-        while(carCrossing.size() >= bridgeThroughput ||
-                !direction.contains(car.getCarDirection())) {
-
-            carWaiting.add(car);
-
+        while (carCrossing.size() >= bridgeThroughput || !isSafe(car)) {
             try {
                 wait();
             } catch (InterruptedException e) {
                 System.err.println("Sleep error");
             }
-
-            carWaiting.remove(car);
+            System.out.println(car + " is waiting");
         }
         carCrossing.add(car);
+        direction = car.getCarDirection();
     }
 
     public synchronized void getOffTheBridge(Car car) {
+        switchDirection = false;
         carCrossing.remove(car);
+        if(carCrossing.size() == 0) {
+            switchDirection = true;
+        }
         notifyBuses();
     }
 
     private synchronized void notifyBuses() {
-        for(int i = bridgeThroughput - carCrossing.size(); i>0; i--) {
-                notify();
-            }
-    }
-
-    public synchronized String getWaitngBusesList() {
-        StringBuilder sb = new StringBuilder();
-        for (Car car : carWaiting) {
-            sb.append(car.toString());
-            sb.append("   ");
-        }
-        return sb.toString();
-    }
-
-    public synchronized String getCrossingBusesList() {
-        StringBuilder sb = new StringBuilder();
-        for (Car car : carCrossing) {
-            sb.append(car.toString());
-            sb.append("   ");
-        }
-        return sb.toString();
+//        for(int i = bridgeThroughput - carCrossing.size(); i>0; i--) {
+//                notify();
+//            }
+        notifyAll();
     }
 }

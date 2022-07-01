@@ -14,15 +14,12 @@ public class Car implements Runnable {
     private int x;
     private final int y;
     private CarState state;
-    private Color color;
+    private final Color color;
 
     private int speed;
 
-    private static int ON_ROAD_TO_BRIDGE_TIME = 2000;
-    private static int ON_BRIDGE_TIME = 3000;
-    private static int ON_ROAD_TO_OUT_TIME = 2000;
-    private Direction direction;
-    private WorldMap worldMap;
+    private final Direction direction;
+    private final WorldMap worldMap;
 
     public Car(WorldMap worldMap) {
         this.worldMap = worldMap;
@@ -82,10 +79,26 @@ public class Car implements Runnable {
 //    }
 
     private void onRoadToBridge() {
+        if(direction == Direction.EAST) {
+            calculateSpeed(WorldArea.WEST_ROAD);
+            if(worldMap.getWorldArea(x) == WorldArea.WEST_GATE) {
+                calculateSpeed(WorldArea.WEST_GATE);
+                state = CarState.GET_ON_BRIDGE;
+            }
+        } else {
+            calculateSpeed(WorldArea.EAST_ROAD);
+            if(worldMap.getWorldArea(x+WIDTH) == WorldArea.EAST_GATE) {
+                calculateSpeed(WorldArea.EAST_GATE);
+                state = CarState.GET_ON_BRIDGE;
+            }
+        }
 //        if(state == CarState.ON_ROAD_TO_BRIDGE) {
-            System.out.println(carID + " " + state);
-            calculateSpeed(ON_ROAD_TO_BRIDGE_TIME);
-            state = CarState.GET_ON_BRIDGE;
+//            System.out.println(carID + " " + state);
+//            calculateSpeed();
+//            if(worldMap.getWorldArea(x) == WorldArea.EAST_GATE ||
+//                worldMap.getWorldArea(x) == WorldArea.WEST_GATE) {
+//                    state = CarState.GET_ON_BRIDGE;
+//            }
 //        }else {
 //            if(direction == Direction.EAST) {
 //                if(x > worldMap.getWorldZoneX(WorldArea.WEST_GATE))
@@ -98,14 +111,36 @@ public class Car implements Runnable {
     }
 
     private void getOnBridge() {
+        if(direction == Direction.EAST) {
+            System.out.println(1);
+            if(worldMap.getWorldArea(x+WIDTH) == WorldArea.BRIDGE) {
+                System.out.println("SINISTRA");
+                bridge.getOnTheBridge(this);
+                System.out.println("Fine getON");
+                calculateSpeed(WorldArea.BRIDGE);
+                state = CarState.CROSS_THE_BRIDGE;
+                System.out.println("DA SINISTRA ");
+            }
+        } else {
+            if(worldMap.getWorldArea(x) == WorldArea.BRIDGE) {
+                bridge.getOnTheBridge(this);
+                calculateSpeed(WorldArea.BRIDGE);
+                state = CarState.CROSS_THE_BRIDGE;
+                System.out.println("DA DESTRA ");
+            }
+        }
+//        calculateSpeed();
+        System.out.println("inizio");
         bridge.getOnTheBridge(this);
+        System.out.println("fine wait");
         state = CarState.CROSS_THE_BRIDGE;
     }
 
     private void crossTheBridge() {
 //        if(nextState == CarState.CROSS_THE_BRIDGE) {
-            System.out.println(carID + " " + state);
-            calculateSpeed(ON_BRIDGE_TIME);
+//            System.out.println(carID + " " + state);
+            calculateSpeed(WorldArea.BRIDGE);
+
             state = CarState.GET_OFF_BRIDGE;
 //        }else {
 //            if(direction == Direction.EAST) {
@@ -125,8 +160,8 @@ public class Car implements Runnable {
 
     private void onRoadToParking() {
 //        if(nextState == CarState.ON_ROAD_TO_OUT) {
-            System.out.println(carID + " " + state);
-            calculateSpeed(ON_ROAD_TO_OUT_TIME);
+//            System.out.println(carID + " " + state);
+            calculateSpeed(WorldArea.EAST_ROAD);
             toRemove();
 //            state = CarState.TO_REMOVE;
 //        }else {
@@ -163,14 +198,9 @@ public class Car implements Runnable {
 //        }
 //    }
 
-    private void calculateSpeed(int time) {
-        int distance;
-        if(direction == Direction.WEST) {
-            distance = worldMap.getWorldZoneHeight(WorldArea.EAST_ROAD);
-        } else {
-            distance = worldMap.getWorldZoneHeight(WorldArea.WEST_ROAD);
-        }
-        speed = 10 * direction.getDirection() * distance/time;
+    private void calculateSpeed(WorldArea worldArea) {
+        int distance = worldMap.getWorldZoneWidth(worldArea);
+        speed = 10 * direction.getDirection() * distance/worldArea.getTimeLimit();
     }
 
     private void updatePosition() {
