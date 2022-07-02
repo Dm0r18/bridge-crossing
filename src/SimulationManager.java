@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SimulationManager implements Runnable {
-    private static final int SPAWN_DELAY = 1000;
+    private static final int SPAWN_DELAY = 5000;
     private final Bridge bridge = Bridge.getInstance();
     private final ArrayList<Car> cars;
     private  WorldMap worldMap;

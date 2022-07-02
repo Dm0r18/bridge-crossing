@@ -25,44 +25,59 @@ public class Bridge {
 
     public void setBridgeThroughput(int bridgeThroughput) {
         this.bridgeThroughput = bridgeThroughput;
-        notifyBuses();
-//        setAllowedDirections();
-    }
-
-    private boolean isSafe(Car c) {
-        if(direction == null) {
-            return true;
-        } else if(switchDirection) {
-            return c.getCarDirection() != direction;
-        } else return c.getCarDirection() == direction;
+        notifyCars();
     }
 
     public synchronized void getOnTheBridge(Car car) {
-        while (carCrossing.size() >= bridgeThroughput || !isSafe(car)) {
+        while (stop(car)) {
             try {
+                System.out.println(car + " is waiting");
                 wait();
             } catch (InterruptedException e) {
                 System.err.println("Sleep error");
             }
-            System.out.println(car + " is waiting");
         }
+        while(switchDirection) {
+            if(car.getCarDirection() != direction) {
+                switchDirection = false;
+            } else {
+//                if()
+                try {
+                    System.out.println(car + " is waiting");
+                    wait();
+                } catch (InterruptedException e) {
+                    System.err.println("Sleep error");
+                }
+            }
+        }
+        System.out.println(Thread.activeCount());
         carCrossing.add(car);
         direction = car.getCarDirection();
     }
 
     public synchronized void getOffTheBridge(Car car) {
-        switchDirection = false;
         carCrossing.remove(car);
         if(carCrossing.size() == 0) {
             switchDirection = true;
         }
-        notifyBuses();
+        notifyCars();
     }
 
-    private synchronized void notifyBuses() {
-//        for(int i = bridgeThroughput - carCrossing.size(); i>0; i--) {
-//                notify();
-//            }
-        notifyAll();
+    private synchronized void notifyCars() {
+        for(int i = bridgeThroughput - carCrossing.size(); i>0; i--) {
+                notify();
+            }
+//        notifyAll();
+    }
+
+    private boolean stop(Car c) {
+        if(carCrossing.size() >= bridgeThroughput) {
+            return true;
+        } if(direction == null) {
+            return false;
+        } else if(switchDirection) {
+            switchDirection = false;
+            return c.getCarDirection().getDirection() == direction.getDirection();
+        } else return c.getCarDirection() != direction;
     }
 }

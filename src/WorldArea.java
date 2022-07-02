@@ -3,7 +3,7 @@ import java.awt.*;
 public enum WorldArea {
     WEST_ROAD("WEST ROAD", Color.LIGHT_GRAY, 3,2000),
     WEST_GATE("WEST GATE", Color.DARK_GRAY, 1,1000),
-    BRIDGE("BRIDGE", new Color(102, 102, 153), 3,3000),
+    BRIDGE("BRIDGE", new Color(102, 102, 153), 3,1000),
     EAST_GATE("EAST GATE", Color.DARK_GRAY, 1,1000),
     EAST_ROAD("EAST ROAD", Color.LIGHT_GRAY, 3,2000);
 
