@@ -1,3 +1,5 @@
+package world;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
@@ -25,7 +27,7 @@ public class WorldZone extends Rectangle {
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setFont(rotatedFont);
-        g2.setColor(Color.WHITE);
+        g2.setColor(Color.darkGray);
 
         FontMetrics fm = g2.getFontMetrics(font);
         int tx = x + width/2 + fm.getHeight()/4;

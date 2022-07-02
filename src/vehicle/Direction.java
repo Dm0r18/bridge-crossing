@@ -1,3 +1,5 @@
+package vehicle;
+
 public enum Direction {
     EAST("E", 1),
     WEST("W", -1);

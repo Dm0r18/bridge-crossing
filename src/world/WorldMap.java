@@ -1,3 +1,5 @@
+package world;
+
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -80,30 +82,6 @@ public class WorldMap {
         else
             return (int) size.getWidth();
     }
-
-//    public int getWorldZoneHeight(WorldArea type) {
-//        Dimension size = getWorldZoneSize(type);
-//        if(size == null)
-//            return 0;
-//        else
-//            return (int) size.getHeight();
-//    }
-//
-//    public int getWorldZoneX(WorldArea type) {
-//        WorldZone worldZone = getWorldZone(type);
-//        if(worldZone == null)
-//            return -1;
-//        else
-//            return (int) worldZone.getX();
-//    }
-//
-//    public int getWorldZoneY(WorldArea type) {
-//        WorldZone worldZone = getWorldZone(type);
-//        if(worldZone == null)
-//            return -1;
-//        else
-//            return (int) worldZone.getY();
-//    }
 
     public void draw(Graphics g) {
         for(WorldZone worldZone : worldZones) {

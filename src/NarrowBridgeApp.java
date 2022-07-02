@@ -9,11 +9,11 @@ public class NarrowBridgeApp extends JFrame implements ChangeListener{
 	private static final String APP_TITLE = "Narrow Bridge Simulation";
 	private static final int SPACE = 4;
 	private final DrawPanel drawPanel = new DrawPanel();
-	private final SimulationManager simulationManager = new SimulationManager(drawPanel);
+	private final Controller controller = new Controller(drawPanel);
 
-	private final JLabel maxBusesOnBridgeLabel = new JLabel("Limit of number of buses crossing the bridge:", JLabel.RIGHT);
-	private final JSpinner maxBusesOnBridgeSpinner = new JSpinner(
-			new SpinnerNumberModel(simulationManager.getBridgeThroughput(), 1, 10, 1));
+	private final JLabel maxCarOnBridgeLabel = new JLabel("Limit of cars crossing the bridge:", JLabel.RIGHT);
+	private final JSpinner maxCarOnBridgeSpinner = new JSpinner(
+			new SpinnerNumberModel(controller.getBridgeThroughput(), 1, 10, 1));
 
 
 	public NarrowBridgeApp() {
@@ -22,7 +22,7 @@ public class NarrowBridgeApp extends JFrame implements ChangeListener{
 		setResizable(false);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		maxBusesOnBridgeSpinner.addChangeListener(this);
+		maxCarOnBridgeSpinner.addChangeListener(this);
 		createWindowLayout();
 		setVisible(true);
 		startSimulation();
@@ -50,8 +50,8 @@ public class NarrowBridgeApp extends JFrame implements ChangeListener{
 		JPanel northEastPanel = new JPanel();
 		northEastPanel.setLayout(new GridLayout(3, 2, SPACE, SPACE));
 		northEastPanel.setBorder(etchedBorder);
-		northEastPanel.add(maxBusesOnBridgeLabel);
-		northEastPanel.add(maxBusesOnBridgeSpinner);
+		northEastPanel.add(maxCarOnBridgeLabel);
+		northEastPanel.add(maxCarOnBridgeSpinner);
 		northPanel.add(northEastPanel);
 		
 		JPanel centerPanel = new JPanel(new GridLayout(1, 2, SPACE, SPACE));
@@ -63,20 +63,20 @@ public class NarrowBridgeApp extends JFrame implements ChangeListener{
 	}
 
 	private void startSimulation() {
-		new Thread(simulationManager, "SIMULATION_MANAGER").start();
+		new Thread(controller, "CONTROLLER").start();
 		new Thread(drawPanel, "DRAW_PANEL").start();
 	}
 	
 	@Override
 	public void stateChanged(ChangeEvent event) {
 		Object eSource = event.getSource();
-		if(eSource == maxBusesOnBridgeSpinner) {
+		if(eSource == maxCarOnBridgeSpinner) {
 			updateBridgeThroughput();
 		}	
 	}
 
 	private void updateBridgeThroughput() {
-		int carLimit = (int) maxBusesOnBridgeSpinner.getValue();
-		simulationManager.setBridgeThroughput(carLimit);
+		int carLimit = (int) maxCarOnBridgeSpinner.getValue();
+		controller.setBridgeThroughput(carLimit);
 	}
 }

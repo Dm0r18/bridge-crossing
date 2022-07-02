@@ -1,11 +1,13 @@
+package world;
+
 import java.awt.*;
 
 public enum WorldArea {
-    WEST_ROAD("WEST ROAD", Color.LIGHT_GRAY, 3,2000),
-    WEST_GATE("WEST GATE", Color.DARK_GRAY, 1,1000),
-    BRIDGE("BRIDGE", new Color(102, 102, 153), 3,1000),
-    EAST_GATE("EAST GATE", Color.DARK_GRAY, 1,1000),
-    EAST_ROAD("EAST ROAD", Color.LIGHT_GRAY, 3,2000);
+    WEST_ROAD("WEST ROAD", new Color(228,220,207), 3,2000),
+    WEST_GATE("WEST GATE", new Color(125,157,156), 1,1000),
+    BRIDGE("BRIDGE", new Color(87,111,114), 3,1000),
+    EAST_GATE("EAST GATE", new Color(125,157,156), 1,1000),
+    EAST_ROAD("EAST ROAD", new Color(228,220,207), 3,2000);
 
     private final String name;
     private final Color color;

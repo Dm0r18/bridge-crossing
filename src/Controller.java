@@ -1,15 +1,19 @@
+import vehicle.Car;
+import world.Bridge;
+import world.WorldMap;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class SimulationManager implements Runnable {
-    private static final int SPAWN_DELAY = 5000;
+public class Controller implements Runnable {
+    private static final int SPAWN_DELAY = 2000;
     private final Bridge bridge = Bridge.getInstance();
     private final ArrayList<Car> cars;
-    private  WorldMap worldMap;
+    private WorldMap worldMap;
     private final DrawPanel drawPanel;
 
-    public SimulationManager(DrawPanel drawPanel) {
+    public Controller(DrawPanel drawPanel) {
         this.drawPanel = drawPanel;
         cars = new ArrayList<>();
     }
